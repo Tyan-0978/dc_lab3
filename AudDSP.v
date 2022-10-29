@@ -34,8 +34,9 @@ parameter PAUSE = 2;
 // slow mode signals
 wire slow_mode;
 reg  slow_valid, next_slow_valid;
-reg  [4:0] slow_count, next_slow_count;
 reg  [15:0] slow_audio_data;
+reg  [4:0] counter_bound;
+reg  [4:0] slow_count;
 
 // state
 reg  [1:0] state, next_state;
@@ -59,7 +60,10 @@ Interp itp0 (
     .o_slow_data(slow_audio_data),
 );
 BoundedCounter (
-    // TODO
+    .i_rst_n(slow_valid),
+    .i_clk(i_clk),
+    .i_bound(counter_bound),
+    .o_count(slow_count)
 );
 
 // ----------------------------------------------------------------------
@@ -108,6 +112,9 @@ always @ (*) begin
 	default: next_state = STOP;
     endcase
 
+    // slow mode signals ----------------------------------
+    // next slow valid
+
     // next outputs ---------------------------------------
     // next audio data
     if (slow_mode) begin
@@ -147,11 +154,13 @@ end
 always @ (posedge i_clk or negedge i_rst_n) begin
     if (!i_rst_n) begin
         state <= STOP;
+	slow_valid <= 0;
 	audio_data <= 0;
 	sram_addr <= 0;
     end
     else begin
         state <= next_state;
+	slow_valid <= next_slow_valid;
 	audio_data <= next_audio_data;
 	sram_addr <= next_sram_addr;
     end
