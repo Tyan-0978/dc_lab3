@@ -33,10 +33,13 @@ parameter PAUSE = 2;
 
 // slow mode signals
 wire slow_mode;
-reg  slow_valid, next_slow_valid;
+wire slow_valid;
+wire slow_pause;
+reg  slow_begin, next_slow_begin, delayed_slow_begin;
 reg  [15:0] slow_audio_data;
-reg  [4:0] counter_bound;
-reg  [4:0] slow_count;
+reg  [3:0] counter_bound;
+reg  [3:0] slow_count;
+reg  reach_bound;
 
 // state
 reg  [1:0] state, next_state;
@@ -49,29 +52,33 @@ reg  [19:0] sram_addr, next_sram_addr;
 // modules
 // ----------------------------------------------------------------------
 
-// TODO
+BoundedCounter bc0 (
+    .i_rst_n(i_rst_n),
+    .i_clk(i_clk),
+    .i_bound(counter_bound),
+    .i_pause(slow_pause),
+    .o_count(slow_count),
+    .o_reach_bound(reach_bound)
+);
 Interp itp0 (
     .i_rst_n(i_rst_n),
     .i_clk(i_clk),
     .i_valid(slow_valid),
+    .i_pause(slow_pause),
     .i_data(i_sram_data),
     .i_mode(i_slow_1),
     .i_speed(i_speed),
-    .o_slow_data(slow_audio_data),
-);
-BoundedCounter (
-    .i_rst_n(slow_valid),
-    .i_clk(i_clk),
-    .i_bound(counter_bound),
-    .o_count(slow_count)
+    .o_slow_data(slow_audio_data)
 );
 
 // ----------------------------------------------------------------------
 // combinational part
 // ----------------------------------------------------------------------
 
-// slow mode
-assign slow_mode = i_slow_0 || i_slow_1;
+// slow mode signals
+assign slow_mode = (i_slow_0 || i_slow_1);
+assign slow_pause = (state == PAUSE);
+assign slow_valid = (reach_bound || slow_begin);
 // outputs
 assign o_dac_data = audio_data;
 assign o_sram_addr = sram_addr;
@@ -113,9 +120,27 @@ always @ (*) begin
     endcase
 
     // slow mode signals ----------------------------------
-    // next slow valid
+    // next slow begin
+    if (state == STOP) begin
+        if (i_start) begin
+            next_slow_begin = 1;
+        end
+        else begin
+            next_slow_begin = 0;
+        end
+    end
+    else begin
+        next_slow_begin = (slow_begin && !delayed_slow_begin);
+    end
+    // counter bound
+    if (state == START) begin
+        counter_bound = i_speed;
+    end
+    else begin
+        counter_bound = 0;
+    end
 
-    // next outputs ---------------------------------------
+    // outputs ---------------------------------------
     // next audio data
     if (slow_mode) begin
         next_audio_data = slow_audio_data;
@@ -127,7 +152,7 @@ always @ (*) begin
     case(state)
     START: begin
         if (slow_mode) begin
-	    if (slow_fetch_data) begin
+	    if (slow_valid) begin
 	        next_sram_addr = sram_addr + 1;
 	    end
 	    else begin
@@ -155,12 +180,16 @@ always @ (posedge i_clk or negedge i_rst_n) begin
     if (!i_rst_n) begin
         state <= STOP;
 	slow_valid <= 0;
+        slow_begin <= 0;
+        delayed_slow_begin <= 0;
 	audio_data <= 0;
 	sram_addr <= 0;
     end
     else begin
         state <= next_state;
 	slow_valid <= next_slow_valid;
+        slow_begin <= next_slow_begin;
+        delayed_slow_begin <= slow_begin;
 	audio_data <= next_audio_data;
 	sram_addr <= next_sram_addr;
     end
