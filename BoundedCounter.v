@@ -6,10 +6,14 @@ module BoundedCounter (
     input        i_rst_n,
     input        i_clk,
     input  [3:0] i_bound,
-    output [3:0] o_count
+    output [3:0] o_count,
+    output       o_reach_bound
 );
 
 reg  [3:0] count, next_count;
+
+assign o_count = count;
+assign o_reach_bound = (count == i_bound);
 
 always @ (*) begin
     if (count == i_bound) begin // reach upper bound; restart from 0
