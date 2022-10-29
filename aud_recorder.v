@@ -10,5 +10,12 @@ module AudRecorder(
 	output o_data,
 );
 
+always @(*) begin
+
+end
+
+always @(posedge i_clk or negedge i_rst_n) begin
+
+end
 
 endmodule

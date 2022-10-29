@@ -104,7 +104,7 @@ AudDSP dsp0(
 );
 
 // === AudPlayer ===
-// receive data address from DSP and fetch data to sent to WM8731 with I2S protocal
+// receive data address from DSP and fetch data to send to WM8731 with I2S protocol
 AudPlayer player0(
 	.i_rst_n(i_rst_n),
 	.i_bclk(i_AUD_BCLK),
@@ -115,7 +115,7 @@ AudPlayer player0(
 );
 
 // === AudRecorder ===
-// receive data from WM8731 with I2S protocal and save to SRAM
+// receive data from WM8731 with I2S protocol and save to SRAM
 AudRecorder recorder0(
 	.i_rst_n(i_rst_n), 
 	.i_clk(i_AUD_BCLK),
