@@ -7,8 +7,11 @@ module AudPlayer(
 	output o_aud_dacdat
 );
 
-reg o_aud_dacdat;
+// output
+reg o_aud_dacdat_r;
 wire o_aud_dacdat_w;
+assign o_aud_dacdat = o_aud_dacdat_r;
+
 /*
 // FSM
 parameter IDLE = 0;
@@ -34,11 +37,11 @@ end
 always @(negedge i_bclk or negedge i_rst_n) begin
     if (i_en && i_rst_n && ! i_daclrck) begin
         counter_r <= counter_w;
-        o_aud_dacdat <= o_aud_dacdat_w;
+        o_aud_dacdat_r <= o_aud_dacdat_w;
     end
     else begin
         counter_r <= 0;
-        o_aud_dacdat <= 0;
+        o_aud_dacdat_r <= 0;
     end
 end
 
