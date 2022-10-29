@@ -28,6 +28,7 @@ parameter SHIFT = 1;
 reg  state, next_state;
 
 // audio data
+// input shifting: i_data >> data_2 >> data_1
 reg  [15:0] data_1, next_data_1;
 reg  [15:0] data_2, next_data_2;
 reg  [15:0][7:0] data_arr, next_data_arr;
@@ -67,7 +68,34 @@ always @ (*) begin
     // next data array
     case(state)
         INTPL: begin
-            // TODO
+            if (i_mode) begin // linear
+                case(i_speed) // TODO
+                    2: begin
+                    end
+                    3: begin
+                    end
+                    4: begin
+                    end
+                    5: begin
+                    end
+                    6: begin
+                    end
+                    7: begin
+                    end
+                    8: begin
+                    end
+                    default: begin
+                        for (integer i = 0; i <= 7; i = i+1) begin
+                            next_data_arr[i] = 0;
+                        end
+                    end
+                endcase
+            end
+            else begin // constant
+                for (integer i = 0; i <= 7; i = i+1) begin
+                    next_data_arr[i] = data_1;
+                end
+            end
         end
         SHIFT: begin
             for (integer i = 0; i <= 6; i = i+1) begin
