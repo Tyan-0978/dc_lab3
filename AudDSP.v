@@ -134,7 +134,7 @@ always @ (*) begin
     end
     // counter bound
     if (state == START) begin
-        counter_bound = i_speed;
+        counter_bound = i_speed - 1; // minus 1 for correct timing
     end
     else begin
         counter_bound = 0;
