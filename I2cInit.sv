@@ -1,17 +1,19 @@
 module I2cInitializer (
     input i_rst_n,
     input i_clk,
-    input i_start,
     output o_finished,
     output o_sclk,
     output o_sdat,
     output o_oen
 );
-logic [23:0] sda_data [0:7-1];
+logic [31:0] sda_data [0:7-1];
 logic [5-1:0] counter32_w, counter32_r;
-logic [24-1:0] data_w, data_r;
+logic [32-1:0] data_w, data_r;
 logic [3-1:0] counter8_w, counter8_r;
+logic finish_w, finish_r;
 logic data_finish;
+logic oen_w, oen_r;
+logic sclk;
 
 assign sda_data = {
     {1'b1,1'b0,27'b0011_0100_1_000_1111_0_1_0000_0000_1,1'b0,2'b00},
@@ -24,9 +26,9 @@ assign sda_data = {
 };
 assign o_finished = finish_r;
 assign data = sda_data[counter8_r+1];
-assign o_sdat = sdat_r[0];
+assign o_sdat = data_r[0];
 assign o_oen = oen_r;
-
+assign o_sclk = sclk;
 //assign reset = 24'b0011_0100_000_1111_0_0000_0000;
 //assign aa_pathctrl = 24'b0011_0100_000_0100_0_0001_0101;
 //assign da_pathctrl = 24'b0011_0100_000_0101_0_0000_0000;
@@ -48,11 +50,11 @@ end
 // decide sclk signals
 always_comb begin
     case (counter32_r) 
-        5'd0: o_sclk = 1'b1;
-        5'd1: o_sclk = 1'b1;
-        5'd30: o_sclk = 1'b1;
-        5'd31: o_sclk = 1'b1;
-        default: o_sclk = i_clk; 
+        5'd0: sclk = 1'b1;
+        5'd1: sclk = 1'b1;
+        5'd30: sclk = 1'b1;
+        5'd31: sclk = 1'b1;
+        default: sclk = i_clk; 
     endcase
 end
 // decide data finish 
@@ -96,18 +98,16 @@ always @ (posedge i_clk or negedge i_rst_n) begin
     if (!i_rst_n) begin
         counter32_r <= 5'd0;
         counter8_r <= 3'd0;
-        sdat_r <= 1'b1;
         finish_r <= 1'b0;
         oen_r <= 1'b1;
-        sdat_r <= {1'b1,1'b0,27'b0011_0100_1_000_1111_0_1_0000_0000_1,1'b0,2'd0};
+        data_r <= {1'b1,1'b0,27'b0011_0100_1_000_1111_0_1_0000_0000_1,1'b0,2'd0};
     end
     else begin
         counter32_r <= counter32_w;
         counter8_r <= counter8_w;
-        sdat_r <= sdat_w;
         finish_r <= finish_w;
         oen_r <= oen_w;
-        sdat_r <= sdat_w;
+        data_r <= data_w;
     end
 end
 endmodule
