@@ -10,7 +10,7 @@ module I2cInitializer (
 logic [23:0] sda_data [0:7-1];
 logic [5-1:0] counter32_w, counter32_r;
 logic [24-1:0] data_w, data_r;
-login [3-1:0] counter8_w, counter8_r;
+logic [3-1:0] counter8_w, counter8_r;
 logic data_finish;
 
 assign sda_data = {
