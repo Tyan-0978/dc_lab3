@@ -1,9 +1,9 @@
 module Top (
 	input i_rst_n,
 	input i_clk,
-	input i_key_0,
-	input i_key_1,
-	input i_key_2,
+	input i_key_0, // start
+	input i_key_1, // stop
+	input i_key_2, // pause
 	// input [3:0] i_speed, // design how user can decide mode on your own
 	
 	// AudDSP and SRAM
