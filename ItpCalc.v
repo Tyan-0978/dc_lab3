@@ -8,7 +8,7 @@ module itp5 (
     output [15:0] o_data_1,
     output [15:0] o_data_2,
     output [15:0] o_data_3,
-    output [15:0] o_data_4,
+    output [15:0] o_data_4
 );
 
 wire [17:0] data_1x4, data_2x4;
@@ -52,7 +52,7 @@ module itp6 (
     output [15:0] o_data_2,
     output [15:0] o_data_3,
     output [15:0] o_data_4,
-    output [15:0] o_data_5,
+    output [15:0] o_data_5
 );
 
 wire [15:0] out_arr [0:4];
@@ -107,7 +107,7 @@ module itp7 (
     output [15:0] o_data_3,
     output [15:0] o_data_4,
     output [15:0] o_data_5,
-    output [15:0] o_data_6,
+    output [15:0] o_data_6
 );
 
 wire [15:0] out_arr [0:5];
@@ -162,7 +162,7 @@ module itp8 (
     output [15:0] o_data_4,
     output [15:0] o_data_5,
     output [15:0] o_data_6,
-    output [15:0] o_data_7,
+    output [15:0] o_data_7
 );
 
 wire [16:0] sum_11;
