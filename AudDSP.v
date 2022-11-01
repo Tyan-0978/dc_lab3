@@ -36,10 +36,10 @@ wire slow_mode;
 wire slow_valid;
 wire slow_pause;
 reg  slow_begin, next_slow_begin, delayed_slow_begin;
-reg  [15:0] slow_audio_data;
+wire [15:0] slow_audio_data;
 reg  [3:0] counter_bound;
-reg  [3:0] slow_count;
-reg  reach_bound;
+wire [3:0] slow_count;
+wire reach_bound;
 
 // state
 reg  [1:0] state, next_state;
@@ -150,26 +150,27 @@ always @ (*) begin
     end
     // next sram address
     case(state)
-    START: begin
-        if (slow_mode) begin
-	    if (slow_valid) begin
-	        next_sram_addr = sram_addr + 1;
+	START: begin
+	    if (slow_mode) begin
+		if (slow_valid) begin
+		    next_sram_addr = sram_addr + 1;
+		end
+		else begin
+		    next_sram_addr = sram_addr;
+		end
 	    end
 	    else begin
-	        next_sram_addr = sram_addr;
+		next_sram_addr = sram_addr + i_speed;
 	    end
-        end
-        else begin
-	    next_sram_addr = sram_addr + i_speed;
-        end
-    end
-    PAUSE: begin
-	next_sram_addr = sram_addr;
-    end
-    STOP: begin
-	next_sram_addr = 0;
-    end
-    default: next_sram_addr = 0;
+	end
+	PAUSE: begin
+	    next_sram_addr = sram_addr;
+	end
+	STOP: begin
+	    next_sram_addr = 0;
+	end
+	default: next_sram_addr = 0;
+    endcase
 end
 
 // ----------------------------------------------------------------------
@@ -179,7 +180,6 @@ end
 always @ (posedge i_clk or negedge i_rst_n) begin
     if (!i_rst_n) begin
         state <= STOP;
-	slow_valid <= 0;
         slow_begin <= 0;
         delayed_slow_begin <= 0;
 	audio_data <= 0;
@@ -187,7 +187,6 @@ always @ (posedge i_clk or negedge i_rst_n) begin
     end
     else begin
         state <= next_state;
-	slow_valid <= next_slow_valid;
         slow_begin <= next_slow_begin;
         delayed_slow_begin <= slow_begin;
 	audio_data <= next_audio_data;
