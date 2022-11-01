@@ -9,7 +9,7 @@ module AudPlayer(
 
 // output
 reg o_aud_dacdat_r;
-wire o_aud_dacdat_w;
+reg o_aud_dacdat_w;
 assign o_aud_dacdat = o_aud_dacdat_r;
 
 /*
@@ -23,11 +23,11 @@ wire state_w [1:0];
 */
 
 // counter
-reg counter_r [15:0];
-wire counter_w [15:0];
-assign counter_w = counter_r + 1;
+reg [15:0] counter_r;
+reg [15:0] counter_w;
 
 always @(*) begin
+    counter_w = counter_r + 1;
     if (counter_r < 16)
         o_aud_dacdat_w = i_dac_data[15-counter_r];
     else 
