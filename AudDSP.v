@@ -28,7 +28,9 @@ parameter PAUSE = 2;
 // signals
 // ----------------------------------------------------------------------
 
-// 
+// play mode signals
+wire [14:0] play_vector;
+reg [3:0] play_speed;
 // slow mode signals
 wire slow_mode;
 wire slow_valid;
@@ -38,7 +40,8 @@ wire [15:0] slow_audio_data;
 reg  [3:0] counter_bound;
 wire [3:0] slow_count;
 wire reach_bound;
-
+wire [1:0] slow_vector
+reg slow_0, slow_1;
 // state
 reg  [1:0] state, next_state;
 
@@ -81,8 +84,6 @@ assign slow_valid = (reach_bound || slow_begin);
 assign o_dac_data = audio_data;
 assign o_sram_addr = sram_addr;
 // decide speed mode
-wire [14:0] play_vector;
-reg [3:0] play_speed;
 assign play_vector[14] = i_speed[14];
 assign play_vector[13] = ( (|i_speed[14] == 0) && (i_speed[13]==1'b1) ) ? 1'b1:1'b0;
 assign play_vector[12] = ( (|i_speed[14:13] == 0) && (i_speed[12]==1'b1) ) ? 1'b1:1'b0;
@@ -120,10 +121,9 @@ always@(*) begin
     endcase
 end
 // decide slow mode or not
-wire [1:0] slow_vector
-reg slow_0, slow_1;
 assign slow_vector[1] = i_speed[16];
 assign slow_vector[0] = ((|i_speed[16] == 1'b0)&&(i_speed[15] == 1'b1)) ? 1'b1 : 1'b0;
+
 always@(*) begin
     case(slow_vector)
         2'b10: begin
@@ -140,9 +140,7 @@ always@(*) begin
         end
     endcase
 end
-always @(*) begin
-    case
-end
+
 always @ (*) begin
     // next state ---------------------------------------
     case(state)
