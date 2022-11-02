@@ -64,8 +64,8 @@ Interp itp0 (
     .i_valid(slow_valid),
     .i_pause(slow_pause),
     .i_data(i_sram_data),
-    .i_mode(i_slow_1),
-    .i_speed(i_speed),
+    .i_mode(slow_1),
+    .i_speed(play_speed),
     .o_slow_data(slow_audio_data)
 );
 
@@ -74,7 +74,7 @@ Interp itp0 (
 // ----------------------------------------------------------------------
 
 // slow mode signals
-assign slow_mode = (i_slow_0 || i_slow_1);
+assign slow_mode = (slow_0 || slow_1);
 assign slow_pause = (state == PAUSE);
 assign slow_valid = (reach_bound || slow_begin);
 // outputs
@@ -120,7 +120,7 @@ always@(*) begin
     endcase
 end
 // decide slow mode or not
-wire [1:0] slow_vector
+wire [1:0] slow_vector;
 reg slow_0, slow_1;
 assign slow_vector[1] = i_speed[16];
 assign slow_vector[0] = ((|i_speed[16] == 1'b0)&&(i_speed[15] == 1'b1)) ? 1'b1 : 1'b0;
@@ -140,9 +140,9 @@ always@(*) begin
         end
     endcase
 end
-always @(*) begin
-    case
-end
+//always @(*) begin
+//    case
+//end
 always @ (*) begin
     // next state ---------------------------------------
     case(state)
@@ -220,7 +220,7 @@ always @ (*) begin
 		end
 	    end
 	    else begin
-		next_sram_addr = sram_addr + i_speed;
+		next_sram_addr = sram_addr + play_speed;
 	    end
 	end
 	PAUSE: begin
