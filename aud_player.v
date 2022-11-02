@@ -27,8 +27,8 @@ reg [4:0] counter_r;
 reg [4:0] counter_w;
 
 always @(*) begin
-    if (counter_r < 17 && i_en && !i_daclrck) begin
-        o_aud_dacdat_w = i_dac_data[16-counter_r];
+    if (counter_r < 16 && i_en && !i_daclrck) begin
+        o_aud_dacdat_w = i_dac_data[15-counter_r];
         counter_w = counter_r + 1; 
     end
     else begin 
