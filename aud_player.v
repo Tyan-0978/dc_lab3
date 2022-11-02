@@ -37,14 +37,14 @@ always @(*) begin
     end
 end
 
-always @(negedge i_bclk or negedge i_rst_n) begin
-    if (i_rst_n) begin
-        counter_r <= counter_w;
-        o_aud_dacdat_r <= o_aud_dacdat_w;
-    end
-    else begin
+always @(posedge i_bclk or negedge i_rst_n) begin
+    if (!i_rst_n) begin
         counter_r <= 0;
         o_aud_dacdat_r <= 0;
+    end
+    else begin
+        counter_r <= counter_w;
+        o_aud_dacdat_r <= o_aud_dacdat_w;
     end
 end
 

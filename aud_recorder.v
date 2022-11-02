@@ -53,20 +53,27 @@ always @(*) begin
         end
         START: begin
             i_start_hold_w = 0;
-            o_data_w = (o_data_r << 1) + i_data;
             o_address_w = o_address_r;
             counter_w = counter_r + 1;
             if (counter_r == 15) begin
                 state_w = STORE;
+                o_data_w = (o_data_r << 1) + i_data;
+            end
+            else if (counter_r == 0) begin 
+                state_w = state_r;
+                o_data_w = i_data;
             end
             else if (i_stop) begin
                 state_w = STOP;
+                o_data_w = (o_data_r << 1) + i_data;
             end
             else if (i_pause) begin
                 state_w = PAUSE;
+                o_data_w = (o_data_r << 1) + i_data;
             end
             else begin
                 state_w = state_r;
+                o_data_w = (o_data_r << 1) + i_data;
             end
 	    end
 
@@ -141,19 +148,19 @@ always @(*) begin
 end
 
 always @(posedge i_clk or negedge i_rst_n) begin
-    if (i_rst_n) begin
-        o_address_r <= o_address_w;
-        o_data_r <= o_data_w;
-        counter_r <= counter_w;
-        state_r <= state_w;
-        i_start_hold_r <= i_start_hold_w;
-    end
-    else begin
+    if (!i_rst_n) begin
         o_address_r <= 0;
         o_data_r <= 0;
         counter_r <= 0;
         state_r <= STOP;
         i_start_hold_r <= 0;
+    end
+    else begin
+        o_address_r <= o_address_w;
+        o_data_r <= o_data_w;
+        counter_r <= counter_w;
+        state_r <= state_w;
+        i_start_hold_r <= i_start_hold_w;
     end
 end
 

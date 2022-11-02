@@ -161,22 +161,22 @@ always_comb begin
                 if (i_key_2) begin // stop
                     state_w = S_IDLE;
                 end
-		else if (i_key_0) // pause
-			state_w = S_RECD_PAUSE;
-                else begin
-                    state_w = S_RECD;
-                end
-            end
-	    S_RECD_PAUSE: begin
-		if (i_key_0) begin // resume recording
-		    state_w = S_RECD;
-		end
-		else if (i_key_2) begin
-		    state_w = S_IDLE;
-		end
-		else begin
-		    state_w = S_RECD_PAUSE;
-		end
+				else if (i_key_0) // pause
+					state_w = S_RECD_PAUSE;
+						else begin
+							state_w = S_RECD;
+						end
+					end
+				S_RECD_PAUSE: begin
+				if (i_key_0) begin // resume recording
+					state_w = S_RECD;
+				end
+				else if (i_key_2) begin
+					state_w = S_IDLE;
+				end
+				else begin
+					state_w = S_RECD_PAUSE;
+				end
             end
             S_PLAY: begin
                 if (i_key_1) begin // pause
