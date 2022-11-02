@@ -8,10 +8,7 @@ module AudDSP (
     input         i_start,
     input         i_pause,
     input         i_stop,
-    input  [3:0]  i_speed,
-    input         i_fast,
-    input         i_slow_0, // constant interpolation
-    input         i_slow_1, // linear interpolation
+    input  [16:0]  i_speed,
     input         i_daclrck,
     input  [15:0] i_sram_data,
     output [15:0] o_dac_data,
@@ -31,6 +28,7 @@ parameter PAUSE = 2;
 // signals
 // ----------------------------------------------------------------------
 
+// 
 // slow mode signals
 wire slow_mode;
 wire slow_valid;
@@ -82,7 +80,69 @@ assign slow_valid = (reach_bound || slow_begin);
 // outputs
 assign o_dac_data = audio_data;
 assign o_sram_addr = sram_addr;
+// decide speed mode
+wire [14:0] play_vector;
+reg [3:0] play_speed;
+assign play_vector[14] = i_speed[14];
+assign play_vector[13] = ( (|i_speed[14] == 0) && (i_speed[13]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[12] = ( (|i_speed[14:13] == 0) && (i_speed[12]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[11] = ( (|i_speed[14:12] == 0) && (i_speed[11]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[10] = ( (|i_speed[14:11] == 0) && (i_speed[10]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[9] = ( (|i_speed[14:10] == 0) && (i_speed[9]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[8] = ( (|i_speed[14:9] == 0) && (i_speed[8]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[7] = ( (|i_speed[14:8] == 0) && (i_speed[7]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[6] = ( (|i_speed[14:7] == 0) && (i_speed[6]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[5] = ( (|i_speed[14:6] == 0) && (i_speed[5]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[4] = ( (|i_speed[14:5] == 0) && (i_speed[4]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[3] = ( (|i_speed[14:4] == 0) && (i_speed[3]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[2] = ( (|i_speed[14:3] == 0) && (i_speed[2]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[1] = ( (|i_speed[14:2] == 0) && (i_speed[1]==1'b1) ) ? 1'b1:1'b0;
+assign play_vector[0] = ( (|i_speed[14:1] == 0) && (i_speed[0]==1'b1) ) ? 1'b1:1'b0;
 
+always@(*) begin
+    case (play_vector)
+       15'b10000_00000_00000:  play_speed = 4'd8;
+       15'b01000_00000_00000:  play_speed = 4'd7;
+       15'b00100_00000_00000:  play_speed = 4'd6;
+       15'b00010_00000_00000:  play_speed = 4'd5;
+       15'b00001_00000_00000:  play_speed = 4'd4;
+       15'b00000_10000_00000:  play_speed = 4'd3;
+       15'b00000_01000_00000:  play_speed = 4'd2;
+       15'b00000_00100_00000:  play_speed = 4'd8;
+       15'b00000_00010_00000:  play_speed = 4'd7;
+       15'b00000_00001_00000:  play_speed = 4'd6;
+       15'b00000_00000_10000:  play_speed = 4'd5;
+       15'b00000_00000_01000:  play_speed = 4'd4;
+       15'b00000_00000_00100:  play_speed = 4'd3;
+       15'b00000_00000_00010:  play_speed = 4'd2;
+       15'b00000_00000_00001:  play_speed = 4'd1;
+       default: play_speed = 4'd1;
+    endcase
+end
+// decide slow mode or not
+wire [1:0] slow_vector
+reg slow_0, slow_1;
+assign slow_vector[1] = i_speed[16];
+assign slow_vector[0] = ((|i_speed[16] == 1'b0)&&(i_speed[15] == 1'b1)) ? 1'b1 : 1'b0;
+always@(*) begin
+    case(slow_vector)
+        2'b10: begin
+            slow_1 = 1'b1;
+            slow_0 = 1'b0;
+        end
+        2'b01: begin
+            slow_1 = 1'b0;
+            slow_0 = 1'b1;
+        end
+        default: begin
+            slow_1 = 1'b0;
+            slow_0 = 1'b0;
+        end
+    endcase
+end
+always @(*) begin
+    case
+end
 always @ (*) begin
     // next state ---------------------------------------
     case(state)
