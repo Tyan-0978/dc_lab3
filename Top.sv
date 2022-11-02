@@ -4,7 +4,7 @@ module Top (
 	input i_key_0, // record
 	input i_key_1, // play
 	input i_key_2, // stop
-	// input [3:0] i_speed, // design how user can decide mode on your own
+	input [16:0] i_speed, // design how user can decide mode on your own
 	
 	// AudDSP and SRAM
 	output [19:0] o_SRAM_ADDR,
@@ -67,7 +67,7 @@ assign stop = (state_r == S_IDLE) || (state_r == S_RECD) || (state_r == S_RECD_P
 
 logic record_start, record_pause, record_stop;
 
-assign record_start = (state_r == S_RECORD);
+assign record_start = (state_r == S_RECD);
 assign record_pause = (state_r == S_RECD_PAUSE);
 assign record_stop = (state_r == S_IDLE) || (state_r == S_PLAY) || (state_r == S_PLAY_PAUSE);
 
@@ -90,7 +90,6 @@ assign o_SRAM_UB_N = 1'b0;
 I2cInitializer init0(
 	.i_rst_n(i_rst_n),
 	.i_clk(i_clk_100K),
-	.i_start(),
 	.o_finished(init_finish),
 	.o_sclk(o_I2C_SCLK),
 	.o_sdat(i2c_sdat),
@@ -106,10 +105,7 @@ AudDSP dsp0(
 	.i_start(play),
 	.i_pause(pause),
 	.i_stop(stop),
-	.i_speed(),
-	.i_fast(),
-	.i_slow_0(), // constant interpolation
-	.i_slow_1(), // linear interpolation
+	.i_speed(i_speed),
 	.i_daclrck(i_AUD_DACLRCK),
 	.i_sram_data(data_play),
 	.o_dac_data(dac_data),
@@ -165,15 +161,23 @@ always_comb begin
                 if (i_key_2) begin // stop
                     state_w = S_IDLE;
                 end
-				else if (i_key_0) // pause
-					state_w = S_RECD_PAUSE;
+		else if (i_key_0) // pause
+			state_w = S_RECD_PAUSE;
                 else begin
                     state_w = S_RECD;
                 end
             end
-			S_RECD_PAUSE: begin
-				if (i_key_0) 
-
+	    S_RECD_PAUSE: begin
+		if (i_key_0) begin // resume recording
+		    state_w = S_RECD;
+		end
+		else if (i_key_2) begin
+		    state_w = S_IDLE;
+		end
+		else begin
+		    state_w = S_RECD_PAUSE;
+		end
+            end
             S_PLAY: begin
                 if (i_key_1) begin // pause
                     state_w = S_PLAY_PAUSE;

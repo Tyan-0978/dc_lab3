@@ -40,7 +40,7 @@ wire [15:0] slow_audio_data;
 reg  [3:0] counter_bound;
 wire [3:0] slow_count;
 wire reach_bound;
-wire [1:0] slow_vector
+wire [1:0] slow_vector;
 reg slow_0, slow_1;
 // state
 reg  [1:0] state, next_state;
