@@ -19,12 +19,12 @@ wire [16:0] sum_15, sum_35, sum_25, sum_45;
 wire [15:0] out_arr [0:3];
 
 assign data_1x4 = i_data_1 << 2;
+assign data_1x16 = i_data_1 << 4;
 assign data_1x32 = i_data_1 << 5;
-assign data_1x64 = i_data_1 << 6;
 assign sum_1_4_16_32 = data_1x4 + data_1x16 + data_1x32;
 assign data_2x4 = i_data_2 << 2;
+assign data_2x16 = i_data_2 << 4;
 assign data_2x32 = i_data_2 << 5;
-assign data_2x64 = i_data_2 << 6;
 assign sum_2_4_16_32 = data_2x4 + data_2x16 + data_2x32;
 
 assign sum_15 = sum_1_4_16_32[21:6] + sum_2_4_16_32[21:8];
