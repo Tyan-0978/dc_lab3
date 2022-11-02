@@ -23,19 +23,22 @@ wire state_w [1:0];
 */
 
 // counter
-reg [15:0] counter_r;
-reg [15:0] counter_w;
+reg [4:0] counter_r;
+reg [4:0] counter_w;
 
 always @(*) begin
-    counter_w = counter_r + 1;
-    if (counter_r < 16)
-        o_aud_dacdat_w = i_dac_data[15-counter_r];
-    else 
+    if (counter_r < 17 && i_en && !i_daclrck) begin
+        o_aud_dacdat_w = i_dac_data[16-counter_r];
+        counter_w = counter_r + 1; 
+    end
+    else begin 
         o_aud_dacdat_w = 0;
+        counter_w = 0;
+    end
 end
 
 always @(negedge i_bclk or negedge i_rst_n) begin
-    if (i_en && i_rst_n && ! i_daclrck) begin
+    if (i_rst_n) begin
         counter_r <= counter_w;
         o_aud_dacdat_r <= o_aud_dacdat_w;
     end
