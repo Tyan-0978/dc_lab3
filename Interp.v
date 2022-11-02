@@ -205,7 +205,7 @@ always @ (posedge i_clk or negedge i_rst_n) begin
         state <= INTPL;
 	data_1 <= 0;
 	data_2 <= 0;
-        for (i = 0; i <= 7; i = i+1) begin
+        for (i = 0; i <= 6; i = i+1) begin
             data_arr[i] = 0;
         end
     end
@@ -213,7 +213,7 @@ always @ (posedge i_clk or negedge i_rst_n) begin
         state <= next_state;
 	data_1 <= next_data_1;
 	data_2 <= next_data_2;
-        for (i = 0; i <= 7; i = i+1) begin
+        for (i = 0; i <= 6; i = i+1) begin
             data_arr[i] = next_data_arr[i];
         end
     end

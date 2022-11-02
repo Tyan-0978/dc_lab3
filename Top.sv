@@ -216,14 +216,14 @@ always_comb begin
 */
 end
 
-always_ff @(posedge i_AUD_BCLK or posedge i_rst_n) begin
+always_ff @(posedge i_AUD_BCLK or negedge i_rst_n) begin
 	if (!i_rst_n) begin
 		/*
 		rec_stop_r = 0;
 		rec_pause_r = 0;
 		rec_start_r = 0;
 		*/
-		state_r = S_IDLE;
+		state_r <= S_IDLE;
 	end
 	else begin
 		/*
@@ -231,7 +231,7 @@ always_ff @(posedge i_AUD_BCLK or posedge i_rst_n) begin
 		rec_pause_r = rec_pause_w;
 		rec_start_r = rec_start_w;
 		*/
-		state_r = state_w;
+		state_r <= state_w;
 	end
 end
 
