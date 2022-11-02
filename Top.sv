@@ -1,9 +1,9 @@
 module Top (
 	input i_rst_n,
 	input i_clk,
-	input i_key_0, // start
-	input i_key_1, // stop
-	input i_key_2, // pause
+	input i_key_0, // record
+	input i_key_1, // play
+	input i_key_2, // stop
 	// input [3:0] i_speed, // design how user can decide mode on your own
 	
 	// AudDSP and SRAM
@@ -47,13 +47,13 @@ module Top (
 
 // design the FSM and states as you like
 parameter S_IDLE       = 0;
-parameter S_I2C        = 1;
-parameter S_RECD       = 2;
-parameter S_PLAY       = 3;
-parameter S_PLAY_PAUSE = 4;
+parameter S_RECD       = 1;
+parameter S_PLAY       = 2;
+parameter S_PLAY_PAUSE = 3;
 logic [2:0] state_r, state_w;
 
 logic i2c_oen, i2c_sdat;
+logic init_finish;
 logic [19:0] addr_record, addr_play;
 logic [15:0] data_record, data_play, dac_data;
 
@@ -78,7 +78,7 @@ I2cInitializer init0(
 	.i_rst_n(i_rst_n),
 	.i_clk(i_clk_100K),
 	.i_start(),
-	.o_finished(),
+	.o_finished(init_finish),
 	.o_sclk(o_I2C_SCLK),
 	.o_sdat(i2c_sdat),
 	.o_oen(i2c_oen) // you are outputing (you are not outputing only when you are "ack"ing.)
@@ -134,6 +134,57 @@ AudRecorder recorder0(
 );
 
 always_comb begin
+    // next state
+    if (init_finish) begin
+        case(state_r)
+            S_IDLE: begin
+                if (i_key_0) begin // record
+                    state_w = S_RECD;
+                end
+                else if (i_key_1) begin // play
+                    state_w = S_PLAY;
+                end
+                else begin
+                    state_w = S_IDLE;
+                end
+            end
+            S_RECD: begin
+                if (i_key_2) begin // stop
+                    state_w = S_IDLE;
+                end
+                else begin
+                    state_w = S_RECD;
+                end
+            end
+            S_PLAY: begin
+                if (i_key_1) begin // pause
+                    state_w = S_PLAY_PAUSE;
+                end
+                if (i_key_2) begin // stop
+                    state_w = S_IDLE;
+                end
+                else begin
+                    state_w = S_PLAY;
+                end
+            end
+            S_PLAY_PAUSE: begin
+                if (i_key_1) begin // continue to play
+                    state_w = S_PLAY;
+                end
+                if (i_key_2) begin // stop
+                    state_w = S_IDLE;
+                end
+                else begin
+                    state_w = S_PLAY_PAUSE;
+                end
+            end
+            default: state_w = S_IDLE;
+        endcase
+    end
+    else begin
+        state_w = S_IDLE;
+    end
+
 	// design your control here
 	case (state_r)
 		S_RECD: begin
