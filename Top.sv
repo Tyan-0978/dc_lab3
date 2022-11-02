@@ -48,8 +48,9 @@ module Top (
 // design the FSM and states as you like
 parameter S_IDLE       = 0;
 parameter S_RECD       = 1;
-parameter S_PLAY       = 2;
-parameter S_PLAY_PAUSE = 3;
+parameter S_RECD_PAUSE = 2;
+parameter S_PLAY       = 3;
+parameter S_PLAY_PAUSE = 4;
 logic [2:0] state_r, state_w;
 
 logic i2c_oen, i2c_sdat;
@@ -59,11 +60,17 @@ logic [15:0] data_record, data_play, dac_data;
 
 logic play, pause, stop;
 
-// 
 assign io_I2C_SDAT = (i2c_oen) ? i2c_sdat : 1'bz;
 assign play = (state_r == S_PLAY);
 assign pause = (state_r == S_PLAY_PAUSE);
-assign stop = (state_r == S_IDLE) || (state_r == S_RECD);
+assign stop = (state_r == S_IDLE) || (state_r == S_RECD) || (state_r == S_RECD_PAUSE);
+
+logic record_start, record_pause, record_stop;
+
+assign record_start = (state_r == S_RECORD);
+assign record_pause = (state_r == S_RECD_PAUSE);
+assign record_stop = (state_r == S_IDLE) || (state_r == S_PLAY) || (state_r == S_PLAY_PAUSE);
+
 
 assign o_SRAM_ADDR = (state_r == S_RECD) ? addr_record : addr_play[19:0];
 assign io_SRAM_DQ  = (state_r == S_RECD) ? data_record : 16'dz; // sram_dq as output
@@ -122,18 +129,18 @@ AudPlayer player0(
 
 // === AudRecorder ===
 // receive data from WM8731 with I2S protocol and save to SRAM
-
+/*
 // start, stop, pause for AudRecorder
 logic rec_start_w, rec_stop_w, rec_pause_w;
 logic rec_start_r, rec_stop_r, rec_pause_r;
-
+*/
 AudRecorder recorder0(
 	.i_rst_n(i_rst_n), 
 	.i_clk(i_AUD_BCLK),
 	.i_lrc(i_AUD_ADCLRCK),
-	.i_start(rec_start_r),
-	.i_pause(rec_pause_r),
-	.i_stop(rec_stop_r),
+	.i_start(record_start),
+	.i_pause(record_pause),
+	.i_stop(record_stop),
 	.i_data(i_AUD_ADCDAT),
 	.o_address(addr_record),
 	.o_data(data_record)
@@ -158,10 +165,15 @@ always_comb begin
                 if (i_key_2) begin // stop
                     state_w = S_IDLE;
                 end
+				else if (i_key_0) // pause
+					state_w = S_RECD_PAUSE;
                 else begin
                     state_w = S_RECD;
                 end
             end
+			S_RECD_PAUSE: begin
+				if (i_key_0) 
+
             S_PLAY: begin
                 if (i_key_1) begin // pause
                     state_w = S_PLAY_PAUSE;
@@ -190,28 +202,31 @@ always_comb begin
     else begin
         state_w = S_IDLE;
     end
-
-	// design your control here
+/*
 	case (state_r)
 		S_RECD: begin
 			rec_start_w = i_key_0;
 			rec_stop_w = i_key_1;
 			rec_pause_w = i_key_2;
 		end
-
+*/
 end
 
 always_ff @(posedge i_AUD_BCLK or posedge i_rst_n) begin
 	if (!i_rst_n) begin
+		/*
 		rec_stop_r = 0;
 		rec_pause_r = 0;
 		rec_start_r = 0;
+		*/
 		state_r = S_IDLE;
 	end
 	else begin
+		/*
 		rec_stop_r = rec_stop_w;
 		rec_pause_r = rec_pause_w;
 		rec_start_r = rec_start_w;
+		*/
 		state_r = state_w;
 	end
 end
