@@ -25,7 +25,8 @@ module Top (
 	inout  i_AUD_ADCLRCK,
 	inout  i_AUD_BCLK,
 	inout  i_AUD_DACLRCK,
-	output o_AUD_DACDAT
+	output o_AUD_DACDAT,
+	output [2:0] state_r
 
 	// SEVENDECODER (optional display)
 	// output [5:0] o_record_time,
@@ -51,7 +52,7 @@ parameter S_RECD       = 1;
 parameter S_RECD_PAUSE = 2;
 parameter S_PLAY       = 3;
 parameter S_PLAY_PAUSE = 4;
-logic [2:0] state_r, state_w;
+logic [2:0] state_w;
 
 logic i2c_oen, i2c_sdat;
 logic init_finish;
@@ -66,12 +67,12 @@ assign pause = (state_r == S_PLAY_PAUSE);
 assign stop = (state_r == S_IDLE) || (state_r == S_RECD) || (state_r == S_RECD_PAUSE);
 
 logic record_start, record_pause, record_stop;
-
+logic i2c_start;
 assign record_start = (state_r == S_RECD);
 assign record_pause = (state_r == S_RECD_PAUSE);
 assign record_stop = (state_r == S_IDLE) || (state_r == S_PLAY) || (state_r == S_PLAY_PAUSE);
 
-
+assign i2c_start      = 1'b1;
 assign o_SRAM_ADDR = (state_r == S_RECD) ? addr_record : addr_play[19:0];
 assign io_SRAM_DQ  = (state_r == S_RECD) ? data_record : 16'dz; // sram_dq as output
 assign data_play   = (state_r != S_RECD) ? io_SRAM_DQ : 16'd0; // sram_dq as input
@@ -89,7 +90,7 @@ assign o_SRAM_UB_N = 1'b0;
 // sequentially send out settings to initialize WM8731 with I2C protocol
 I2cInitializer init0(
 	.i_rst_n(i_rst_n),
-	.i_clk(i_clk_100K),
+	.i_clk(i_clk_100k),
 	.o_finished(init_finish),
 	.o_sclk(o_I2C_SCLK),
 	.o_sdat(i2c_sdat),
@@ -216,7 +217,7 @@ always_comb begin
 */
 end
 
-always_ff @(posedge i_AUD_BCLK or negedge i_rst_n) begin
+always_ff @(posedge i_clk or negedge i_rst_n) begin
 	if (!i_rst_n) begin
 		/*
 		rec_stop_r = 0;

@@ -30,6 +30,7 @@ parameter START = 1; // receive data
 parameter PAUSE = 2; // wait for start signal
 parameter STORE = 3; // store the received data // TB checked
 parameter IDLE = 4; // wait for next data
+parameter CLEAR = 5;
 
 // i_start_hold
 reg i_start_hold_r;
@@ -38,6 +39,16 @@ reg i_start_hold_w;
 always @(*) begin
     // determine next state & what to do accordingly
     case (state_r)
+			CLEAR: begin
+				counter_w = 0;
+				o_address_w = o_address_r + 1;
+				o_data_w = 0;
+				i_start_hold_w = 0;
+				if (o_address_r == 20'b11111111111111111111) 
+					state_w = STOP;
+				else 
+					state_w = state_r;
+			end
         STOP: begin
             counter_w = 0;
             o_address_w = 0;
@@ -152,7 +163,7 @@ always @(posedge i_clk or negedge i_rst_n) begin
         o_address_r <= 0;
         o_data_r <= 0;
         counter_r <= 0;
-        state_r <= STOP;
+        state_r <= CLEAR;
         i_start_hold_r <= 0;
     end
     else begin

@@ -21,13 +21,13 @@ logic [30:0] da_interfaceform;
 logic [30:0] samplingctrl, activectrl;
 logic sdat_w, sdat_r;
 
-assign reset = {2'b11,1'b0,27'b1_0000_0000_1_0_1111_000_1_0010_1100,1'b0};
-assign aa_pathctrl = {1'b0,2'b11,1'b0,27'b1_1010_1000_1_0_0010_000_1_0010_1100};
-assign da_pathctrl = {1'b0,2'b11,1'b0,27'b1_0000_0000_1_0_1010_000_1_0010_1100};
-assign power_down_ctrl = {1'b0,2'b11,1'b0,27'b1_0000_0000_1_0_0110_000_1_0010_1100};
-assign da_interfaceform = {1'b0,2'b11,1'b0,27'b1_0100_0010_1_0_1110_000_1_0010_1100};
-assign samplingctrl = {1'b0,2'b11,1'b0,27'b1_1001_1000_1_0_0001_000_1_0010_1100};
-assign activectrl = {1'b0,2'b11,1'b0,27'b1_1000_0000_1_0_1001_000_1_0010_1100};    
+assign reset = {2'b11,1'b1,27'b1_0000_0000_1_0_1111_000_1_0010_1100,1'b0};
+assign aa_pathctrl = {1'b0,2'b11,1'b1,27'b1_1010_1000_1_0_0010_000_1_0010_1100};
+assign da_pathctrl = {1'b0,2'b11,1'b1,27'b1_0000_0000_1_0_1010_000_1_0010_1100};
+assign power_down_ctrl = {1'b0,2'b11,1'b1,27'b1_0000_0000_1_0_0110_000_1_0010_1100};
+assign da_interfaceform = {1'b0,2'b11,1'b1,27'b1_0100_0010_1_0_1110_000_1_0010_1100};
+assign samplingctrl = {1'b0,2'b11,1'b1,27'b1_1001_1000_1_0_0001_000_1_0010_1100};
+assign activectrl = {1'b0,2'b11,1'b1,27'b1_1000_0000_1_0_1001_000_1_0010_1100};    
 
 assign o_finished = finish;
 assign o_sdat = sdat_r;
